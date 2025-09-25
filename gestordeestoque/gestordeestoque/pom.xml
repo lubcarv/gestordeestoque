@@ -15,7 +15,7 @@
 	<description>Projeto voltado para o controle e gestão de entrada e saída de produtos</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 
 	<dependencies>

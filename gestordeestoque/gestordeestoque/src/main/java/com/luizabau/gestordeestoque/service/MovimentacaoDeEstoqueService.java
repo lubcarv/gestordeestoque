@@ -52,11 +52,11 @@ public class MovimentacaoDeEstoqueService {
     }
 
     // RF11
+    // Otimizado para usar query específica do repositório ao invés de filtrar todos os produtos em Java
     @Transactional(readOnly = true)
     public List<ProdutoSimpleDTO> listarProdutosPrecisandoReposicao() {
-        List<Produto> produtos = produtoRepository.findAll();
+        List<Produto> produtos = produtoRepository.findProdutosComEstoqueBaixo();
         return produtos.stream()
-                .filter(Produto::isPrecisoReposicao)
                 .map(produtoMapper::toSimpleDTO)
                 .collect(Collectors.toList());
     }
