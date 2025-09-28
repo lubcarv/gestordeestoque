@@ -52,15 +52,14 @@ public class MovimentacaoDeEstoqueService {
     }
 
     // RF11
-    @Transactional(readOnly = true)
     public List<ProdutoSimpleDTO> listarProdutosPrecisandoReposicao() {
-        List<Produto> produtos = produtoRepository.findAll();
+        List<Produto> produtos = produtoRepository.findProdutosComEstoqueBaixo();
         return produtos.stream()
-                .filter(Produto::isPrecisoReposicao)
                 .map(produtoMapper::toSimpleDTO)
                 .collect(Collectors.toList());
     }
 
+//nao faz sentido, retirar depois
     @Transactional(readOnly = true)
     public boolean verificarDisponibilidade(Integer produtoId, int quantidadeDesejada) throws Exception {
         Produto produto = buscarProdutoPorId(produtoId);

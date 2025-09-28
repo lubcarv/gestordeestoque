@@ -35,7 +35,7 @@ public class ProdutoUpdateDTO {
     @Size(max = 30, message = "Cor deve ter no máximo 30 caracteres")
     private String cor;
 
-    @PositiveOrZero(message = "Quantidade mínima deve ser zero ou positiva")
+    @Positive(message = "Quantidade mínima deve ser maior que zero")
     private Integer quantidadeMinima;
 
     @PositiveOrZero(message = "Quantidade ideal deve ser zero ou positiva")

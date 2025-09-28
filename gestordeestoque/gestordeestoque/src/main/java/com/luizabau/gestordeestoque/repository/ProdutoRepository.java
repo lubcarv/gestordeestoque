@@ -24,6 +24,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Integer> {
             "AND p.ativo = true")
     List<Produto> findProdutosComEstoqueBaixo();
 
+    @Query("SELECT COUNT(p) > 0 FROM Produto p WHERE UPPER(p.nome) = UPPER(:nome) AND p.categoria.id = :categoriaId")
+    boolean existsByNomeAndCategoria(@Param("nome") String nome, @Param("categoriaId") Integer categoriaId);
+
     @Query("SELECT p FROM Produto p " +
             "LEFT JOIN FETCH p.categoria " +
             "LEFT JOIN FETCH p.fornecedor " +

@@ -36,11 +36,12 @@ public class CadastroProdutoService {
             fornecedor = fornecedorRepository.findById(createDTO.getFornecedorId())
                     .orElseThrow(() -> new Exception("Fornecedor não encontrado"));
         }
-
         if (produtoRepository.existsByCodigo(createDTO.getCodigo())) {
             throw new Exception("Já existe um produto com o código: " + createDTO.getCodigo());
         }
-
+        if (produtoRepository.existsByNomeAndCategoria(createDTO.getNome(), createDTO.getCategoriaId())) {
+            throw new Exception("Já existe um produto com este nome para a mesma categoria.");
+        }
         Produto produto = Produto.builder()
                 .codigo(createDTO.getCodigo())
                 .nome(createDTO.getNome())
@@ -57,6 +58,7 @@ public class CadastroProdutoService {
                 .fornecedor(fornecedor)
                 .build();
 
+        produto.getEstoque().atualizarSituacao();
         produto = produtoRepository.save(produto);
         return produtoMapper.toResponseDTO(produto);
     }
@@ -66,6 +68,13 @@ public class CadastroProdutoService {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Produto não encontrado"));
 
+        String novoNome = updateDTO.getNome() != null ? updateDTO.getNome() : produto.getNome();
+        Integer novaCategoriaId = updateDTO.getCategoriaId() != null ? updateDTO.getCategoriaId() : produto.getCategoria().getId();
+
+        if (produtoRepository.existsByNomeAndCategoria(novoNome, novaCategoriaId)
+                && !(novoNome.equalsIgnoreCase(produto.getNome()) && novaCategoriaId.equals(produto.getCategoria().getId()))) {
+            throw new Exception("Já existe um produto com este nome para a mesma categoria.");
+        }
         if (updateDTO.getCodigo() != null) {
             if (!produto.getCodigo().equals(updateDTO.getCodigo()) &&
                     produtoRepository.existsByCodigo(updateDTO.getCodigo())) {
@@ -73,7 +82,6 @@ public class CadastroProdutoService {
             }
             produto.setCodigo(updateDTO.getCodigo());
         }
-
         if (updateDTO.getNome() != null) produto.setNome(updateDTO.getNome());
         if (updateDTO.getDescricao() != null) produto.setDescricao(updateDTO.getDescricao());
         if (updateDTO.getPreco() != null) produto.setPreco(updateDTO.getPreco());
@@ -97,6 +105,7 @@ public class CadastroProdutoService {
             produto.setFornecedor(fornecedor);
         }
 
+        produto.getEstoque().atualizarSituacao();
         produto = produtoRepository.save(produto);
         return produtoMapper.toResponseDTO(produto);
     }

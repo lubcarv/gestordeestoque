@@ -51,11 +51,10 @@ public class Produto {
     @Column(name = "cor", length = 30)
     private String cor;
 
-    @NotNull(message = "Quantidade mínima é obrigatória")
-    @PositiveOrZero(message = "Quantidade mínima deve ser zero ou positiva")
+    @Positive(message = "Quantidade mínima deve ser maior que zero")
     @Builder.Default
     @Column(name = "quantidade_minima", nullable = false)
-    private Integer quantidadeMinima = 0;
+    private Integer quantidadeMinima = 1;
 
     @PositiveOrZero(message = "Quantidade ideal deve ser zero ou positiva")
     @Column(name = "quantidade_ideal")
@@ -107,8 +106,7 @@ public class Produto {
             this.estoque.setQuantidadeMinima(this.quantidadeMinima);
             this.estoque.setQuantidadeIdeal(this.quantidadeIdeal);
             this.estoque.setQuantidadeMaxima(this.quantidadeMaxima);
-            this.estoque.setSituacao(SituacaoEstoque.NORMAL);
-        }
+            this.estoque.atualizarSituacao();        }
     }
 
     @PreUpdate
