@@ -19,15 +19,10 @@ public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
+
     @GetMapping
     public ResponseEntity<List<CategoriaResponseDTO>> listar() {
         List<CategoriaResponseDTO> categorias = categoriaService.listarTodas();
-        return ResponseEntity.ok(categorias);
-    }
-
-    @GetMapping("/ativas")
-    public ResponseEntity<List<CategoriaSimpleDTO>> listarAtivas() {
-        List<CategoriaSimpleDTO> categorias = categoriaService.listarAtivas();
         return ResponseEntity.ok(categorias);
     }
 
@@ -41,6 +36,7 @@ public class CategoriaController {
         }
     }
 
+
     @GetMapping("/descricao/{descricao}")
     public ResponseEntity<List<CategoriaResponseDTO>> buscarPorDescricao(@PathVariable String descricao) {
         try {
@@ -50,6 +46,7 @@ public class CategoriaController {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @PostMapping
     public ResponseEntity<CategoriaResponseDTO> criar(@Valid @RequestBody CategoriaCreateDTO createDTO) {
@@ -62,6 +59,7 @@ public class CategoriaController {
                     .build();
         }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaResponseDTO> atualizar(
@@ -76,6 +74,7 @@ public class CategoriaController {
                     .build();
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {

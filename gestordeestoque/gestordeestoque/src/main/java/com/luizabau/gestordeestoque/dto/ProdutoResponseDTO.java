@@ -1,17 +1,14 @@
 package com.luizabau.gestordeestoque.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.luizabau.gestordeestoque.domain.Produto;
+import com.luizabau.gestordeestoque.domain.SituacaoEstoque;
+import lombok.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProdutoResponseDTO {
     private Integer id;
     private String codigo;
@@ -21,19 +18,36 @@ public class ProdutoResponseDTO {
     private String unidadeMedida;
     private String dimensoes;
     private String cor;
+    private Integer quantidadeEstoque;
     private Integer quantidadeMinima;
     private Integer quantidadeIdeal;
     private Integer quantidadeMaxima;
     private Boolean ativo;
+    private String categoriaNome;
+    private String fornecedorNome;
+    private SituacaoEstoque situacaoEstoque;
 
-    private CategoriaSimpleDTO categoria;
-    private FornecedorSimpleDTO fornecedor;
-    private EstoqueSimpleDTO estoque;
-    private LocalDateTime dataCriacao;
-    private LocalDateTime dataAtualizacao;
-    private String usuarioCriacao;
-    private String usuarioAtualizacao;
 
-    private Boolean precisaReposicao;
-    private String nivelEstoque;
+    public static ProdutoResponseDTO from(Produto produto) {
+        ProdutoResponseDTO dto = new ProdutoResponseDTO();
+        dto.id = produto.getId();
+        dto.codigo = produto.getCodigo();
+        dto.nome = produto.getNome();
+        dto.descricao = produto.getDescricao();
+        dto.preco = produto.getPreco();
+        dto.unidadeMedida = produto.getUnidadeMedida();
+        dto.dimensoes = produto.getDimensoes();
+        dto.cor = produto.getCor();
+        dto.quantidadeEstoque = produto.getEstoque() != null ? produto.getEstoque().getQuantidade() : 0;
+        dto.quantidadeMinima = produto.getQuantidadeMinima();
+        dto.quantidadeIdeal = produto.getQuantidadeIdeal();
+        dto.quantidadeMaxima = produto.getQuantidadeMaxima();
+        dto.ativo = produto.getAtivo();
+        dto.categoriaNome = produto.getCategoria() != null ? produto.getCategoria().getNome() : null;
+        dto.fornecedorNome = produto.getFornecedor() != null ? produto.getFornecedor().getNome() : null;
+        dto.situacaoEstoque = produto.getEstoque() != null
+                ? produto.getEstoque().getSituacao()
+                : SituacaoEstoque.SEM_ESTOQUE;
+        return dto;
+    }
 }

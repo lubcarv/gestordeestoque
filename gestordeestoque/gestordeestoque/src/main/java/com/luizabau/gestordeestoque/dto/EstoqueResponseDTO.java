@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EstoqueSimpleDTO {
+public class EstoqueResponseDTO {
     private Integer quantidade;
     private Integer quantidadeMinima;
     private Integer quantidadeMaxima;

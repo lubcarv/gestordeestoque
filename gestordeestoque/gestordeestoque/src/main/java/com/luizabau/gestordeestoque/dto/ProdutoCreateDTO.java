@@ -1,5 +1,6 @@
 package com.luizabau.gestordeestoque.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,17 +43,16 @@ public class ProdutoCreateDTO {
     @Positive(message = "Quantidade mínima deve ser maior que zero")
     private Integer quantidadeMinima;
 
-    @PositiveOrZero(message = "Quantidade ideal deve ser zero ou positiva")
     private Integer quantidadeIdeal;
 
-    @PositiveOrZero(message = "Quantidade máxima deve ser zero ou positiva")
     private Integer quantidadeMaxima;
 
+    public EstoqueCreateDTO estoque;
     @Builder.Default
     private Boolean ativo = true;
-
-    @NotNull(message = "Categoria é obrigatória")
+     @JsonIgnoreProperties
     private Integer categoriaId;
+    @JsonIgnoreProperties
+   private Integer fornecedorId;
 
-    private Integer fornecedorId;
 }

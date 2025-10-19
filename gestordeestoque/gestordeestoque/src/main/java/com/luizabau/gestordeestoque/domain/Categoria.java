@@ -1,15 +1,19 @@
 package com.luizabau.gestordeestoque.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "categorias")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,7 +25,7 @@ public class Categoria {
 
     @NotBlank(message = "Nome é obrigatório")
     @Size(max = 50, message = "Nome deve ter no máximo 50 caracteres")
-    @Column(name = "nome", length = 50, nullable = false)
+    @Column(name = "nome", length = 50, nullable = false, unique = true)
     private String nome;
 
     @Size(max = 200, message = "Descrição deve ter no máximo 200 caracteres")
@@ -33,11 +37,21 @@ public class Categoria {
     private Boolean ativa = true;
 
     @Column(name = "data_criacao", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime dataCriacao = LocalDateTime.now();
+    private LocalDateTime dataCriacao;
 
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
+
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @Builder.Default
+    private List<Produto> produtos = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        this.dataCriacao = LocalDateTime.now();
+        this.dataAtualizacao = LocalDateTime.now();
+    }
 
     @PreUpdate
     protected void onUpdate() {

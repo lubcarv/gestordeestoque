@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum SituacaoEstoque {
-    ESGOTADO("SEM_ESTOQUE"),
+    SEM_ESTOQUE("SEM_ESTOQUE"),
     BAIXO("BAIXO"),
     NORMAL("NORMAL"),
     ALTO("ALTO");

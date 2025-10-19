@@ -1,16 +1,13 @@
 package com.luizabau.gestordeestoque.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.luizabau.gestordeestoque.domain.Categoria;
+import lombok.*;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CategoriaResponseDTO {
     private Integer id;
     private String nome;
@@ -19,4 +16,17 @@ public class CategoriaResponseDTO {
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
     private Integer totalProdutos;
+
+
+    public static CategoriaResponseDTO from(Categoria categoria) {
+        CategoriaResponseDTO dto = new CategoriaResponseDTO();
+        dto.id = categoria.getId();
+        dto.nome = categoria.getNome();
+        dto.descricao = categoria.getDescricao();
+        dto.ativa = categoria.getAtiva();
+        dto.dataCriacao = categoria.getDataCriacao();
+        dto.dataAtualizacao = categoria.getDataAtualizacao();
+        dto.totalProdutos = categoria.getProdutos() != null ? categoria.getProdutos().size() : 0;
+        return dto;
+    }
 }

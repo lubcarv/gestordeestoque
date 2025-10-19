@@ -3,9 +3,7 @@ package com.luizabau.gestordeestoque.service;
 import com.luizabau.gestordeestoque.domain.Fornecedor;
 import com.luizabau.gestordeestoque.dto.FornecedorCreateDTO;
 import com.luizabau.gestordeestoque.dto.FornecedorResponseDTO;
-import com.luizabau.gestordeestoque.dto.FornecedorSimpleDTO;
 import com.luizabau.gestordeestoque.dto.FornecedorUpdateDTO;
-import com.luizabau.gestordeestoque.mapper.FornecedorMapper;
 import com.luizabau.gestordeestoque.repository.FornecedorRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,28 +17,23 @@ import java.util.stream.Collectors;
 public class FornecedorService {
 
     private final FornecedorRepository fornecedorRepository;
-    private final FornecedorMapper fornecedorMapper;
+
 
     @Transactional(readOnly = true)
     public List<FornecedorResponseDTO> listarTodos() {
         return fornecedorRepository.findAll().stream()
-                .map(fornecedorMapper::toResponseDTO)
+                .map(FornecedorResponseDTO::from)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<FornecedorSimpleDTO> listarAtivos() {
-        return fornecedorRepository.findByAtivoTrue().stream()
-                .map(fornecedorMapper::toSimpleDTO)
-                .collect(Collectors.toList());
-    }
 
     @Transactional(readOnly = true)
     public FornecedorResponseDTO buscarPorId(Integer id) throws Exception {
         Fornecedor fornecedor = fornecedorRepository.findById(id)
                 .orElseThrow(() -> new Exception("Fornecedor não encontrado"));
-        return fornecedorMapper.toResponseDTO(fornecedor);
+        return FornecedorResponseDTO.from(fornecedor);
     }
+
 
     @Transactional(readOnly = true)
     public List<FornecedorResponseDTO> buscarPorNome(String nome) throws Exception {
@@ -49,9 +42,10 @@ public class FornecedorService {
             throw new Exception("Nenhum fornecedor encontrado com o nome: " + nome);
         }
         return fornecedores.stream()
-                .map(fornecedorMapper::toResponseDTO)
+                .map(FornecedorResponseDTO::from)
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public FornecedorResponseDTO criar(FornecedorCreateDTO createDTO) throws Exception {
@@ -63,11 +57,19 @@ public class FornecedorService {
             throw new Exception("Já existe um fornecedor com este CNPJ");
         }
 
-        Fornecedor fornecedor = fornecedorMapper.toEntity(createDTO);
-        fornecedor = fornecedorRepository.save(fornecedor);
+        Fornecedor fornecedor = Fornecedor.builder()
+                .nome(createDTO.getNome())
+                .email(createDTO.getEmail())
+                .fone(createDTO.getFone())
+                .cnpj(createDTO.getCnpj())
+                .endereco(createDTO.getEndereco())
+                .ativo(createDTO.getAtivo() != null ? createDTO.getAtivo() : true)
+                .build();
 
-        return fornecedorMapper.toResponseDTO(fornecedor);
+        fornecedor = fornecedorRepository.save(fornecedor);
+        return FornecedorResponseDTO.from(fornecedor);
     }
+
 
     @Transactional
     public FornecedorResponseDTO atualizar(Integer id, FornecedorUpdateDTO updateDTO) throws Exception {
@@ -94,8 +96,9 @@ public class FornecedorService {
         if (updateDTO.getAtivo() != null) fornecedor.setAtivo(updateDTO.getAtivo());
 
         fornecedor = fornecedorRepository.save(fornecedor);
-        return fornecedorMapper.toResponseDTO(fornecedor);
+        return FornecedorResponseDTO.from(fornecedor);
     }
+
 
     @Transactional
     public void excluir(Integer id) throws Exception {

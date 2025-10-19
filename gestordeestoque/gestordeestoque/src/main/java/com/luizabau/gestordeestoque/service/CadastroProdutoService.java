@@ -3,17 +3,19 @@ package com.luizabau.gestordeestoque.service;
 import com.luizabau.gestordeestoque.domain.Categoria;
 import com.luizabau.gestordeestoque.domain.Fornecedor;
 import com.luizabau.gestordeestoque.domain.Produto;
+import com.luizabau.gestordeestoque.domain.SituacaoEstoque;
 import com.luizabau.gestordeestoque.dto.ProdutoCreateDTO;
 import com.luizabau.gestordeestoque.dto.ProdutoResponseDTO;
-import com.luizabau.gestordeestoque.dto.ProdutoSimpleDTO;
 import com.luizabau.gestordeestoque.dto.ProdutoUpdateDTO;
-import com.luizabau.gestordeestoque.mapper.ProdutoMapper;
 import com.luizabau.gestordeestoque.repository.CategoriaRepository;
 import com.luizabau.gestordeestoque.repository.FornecedorRepository;
 import com.luizabau.gestordeestoque.repository.ProdutoRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,24 +26,21 @@ public class CadastroProdutoService {
     private final ProdutoRepository produtoRepository;
     private final FornecedorRepository fornecedorRepository;
     private final CategoriaRepository categoriaRepository;
-    private final ProdutoMapper produtoMapper;
 
     @Transactional
     public ProdutoResponseDTO criarProduto(ProdutoCreateDTO createDTO) throws Exception {
         Categoria categoria = categoriaRepository.findById(createDTO.getCategoriaId())
                 .orElseThrow(() -> new Exception("Categoria não encontrada"));
+        Fornecedor fornecedor = fornecedorRepository.findById(createDTO.getFornecedorId())
+                .orElseThrow(() -> new Exception("Fornecedor não encontrado"));
 
-        Fornecedor fornecedor = null;
-        if (createDTO.getFornecedorId() != null) {
-            fornecedor = fornecedorRepository.findById(createDTO.getFornecedorId())
-                    .orElseThrow(() -> new Exception("Fornecedor não encontrado"));
-        }
         if (produtoRepository.existsByCodigo(createDTO.getCodigo())) {
             throw new Exception("Já existe um produto com o código: " + createDTO.getCodigo());
         }
-        if (produtoRepository.existsByNomeAndCategoria(createDTO.getNome(), createDTO.getCategoriaId())) {
+        if (produtoRepository.existeNomeECategoria(createDTO.getNome(), createDTO.getCategoriaId())) {
             throw new Exception("Já existe um produto com este nome para a mesma categoria.");
         }
+
         Produto produto = Produto.builder()
                 .codigo(createDTO.getCodigo())
                 .nome(createDTO.getNome())
@@ -58,9 +57,9 @@ public class CadastroProdutoService {
                 .fornecedor(fornecedor)
                 .build();
 
-        produto.getEstoque().atualizarSituacao();
         produto = produtoRepository.save(produto);
-        return produtoMapper.toResponseDTO(produto);
+
+        return ProdutoResponseDTO.from(produto);
     }
 
     @Transactional
@@ -71,10 +70,11 @@ public class CadastroProdutoService {
         String novoNome = updateDTO.getNome() != null ? updateDTO.getNome() : produto.getNome();
         Integer novaCategoriaId = updateDTO.getCategoriaId() != null ? updateDTO.getCategoriaId() : produto.getCategoria().getId();
 
-        if (produtoRepository.existsByNomeAndCategoria(novoNome, novaCategoriaId)
+        if (produtoRepository.existeNomeECategoria(novoNome, novaCategoriaId)
                 && !(novoNome.equalsIgnoreCase(produto.getNome()) && novaCategoriaId.equals(produto.getCategoria().getId()))) {
             throw new Exception("Já existe um produto com este nome para a mesma categoria.");
         }
+
         if (updateDTO.getCodigo() != null) {
             if (!produto.getCodigo().equals(updateDTO.getCodigo()) &&
                     produtoRepository.existsByCodigo(updateDTO.getCodigo())) {
@@ -82,6 +82,7 @@ public class CadastroProdutoService {
             }
             produto.setCodigo(updateDTO.getCodigo());
         }
+
         if (updateDTO.getNome() != null) produto.setNome(updateDTO.getNome());
         if (updateDTO.getDescricao() != null) produto.setDescricao(updateDTO.getDescricao());
         if (updateDTO.getPreco() != null) produto.setPreco(updateDTO.getPreco());
@@ -105,15 +106,22 @@ public class CadastroProdutoService {
             produto.setFornecedor(fornecedor);
         }
 
+        if (produto.getEstoque() != null) {
+        if (produto.getEstoque().getSituacao() == null) {
+            produto.getEstoque().setSituacao(SituacaoEstoque.SEM_ESTOQUE);
+        }
         produto.getEstoque().atualizarSituacao();
+    }
         produto = produtoRepository.save(produto);
-        return produtoMapper.toResponseDTO(produto);
+
+        return ProdutoResponseDTO.from(produto);
     }
 
+
     @Transactional(readOnly = true)
-    public List<ProdutoSimpleDTO> listarProdutos() {
+    public List<ProdutoResponseDTO> listarProdutos() {
         return produtoRepository.findAll().stream()
-                .map(produtoMapper::toSimpleDTO)
+                .map(ProdutoResponseDTO::from)
                 .collect(Collectors.toList());
     }
 
@@ -121,25 +129,67 @@ public class CadastroProdutoService {
     public ProdutoResponseDTO buscarProduto(Integer id) throws Exception {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Produto não encontrado"));
-        return produtoMapper.toResponseDTO(produto);
+        return ProdutoResponseDTO.from(produto);
     }
 
     @Transactional
-    public Produto salvar(Produto produto) {
+    public ProdutoResponseDTO ativarProduto(Integer id) throws Exception {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new Exception("Produto não encontrado com ID: " + id));
+
+        if (produto.getAtivo()) {
+            throw new Exception("Produto já está ativo");
+        }
+
+        produto.ativar();
         produto = produtoRepository.save(produto);
-        if (produto.getCategoria() != null && produto.getCategoria().getId() != null) {
-            Categoria categoria = categoriaRepository.findById(produto.getCategoria().getId()).orElse(null);
-            produto.setCategoria(categoria);
-        }
-        if (produto.getFornecedor() != null && produto.getFornecedor().getId() != null) {
-            Fornecedor fornecedor = fornecedorRepository.findById(produto.getFornecedor().getId()).orElse(null);
-            produto.setFornecedor(fornecedor);
-        }
-        return produto;
+
+        return ProdutoResponseDTO.from(produto);
     }
 
     @Transactional
-    public void excluir(Integer id) {
+    public ProdutoResponseDTO inativarProduto(Integer id) throws Exception {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new Exception("Produto não encontrado com ID: " + id));
+
+        if (!produto.getAtivo()) {
+            throw new Exception("Produto já está inativo");
+        }
+
+        produto.inativar();
+        produto = produtoRepository.save(produto);
+
+        return ProdutoResponseDTO.from(produto);
+    }
+
+    @Transactional
+    public void excluir(Integer id) throws Exception {
+        if (!produtoRepository.existsById(id)) {
+            throw new Exception("Produto não encontrado");
+        }
         produtoRepository.deleteById(id);
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProdutoResponseDTO> buscarComFiltros(
+            String codigo,
+            String nome,
+            Integer categoriaId,
+            Integer fornecedorId,
+            Boolean ativo
+    ) {
+        List<Produto> produtos = produtoRepository.findByFiltros(
+                codigo,
+                nome,
+                categoriaId,
+                fornecedorId,
+                ativo
+        );
+
+        return produtos.stream()
+                .map(ProdutoResponseDTO::from)
+                .collect(Collectors.toList());
     }
 }
+

@@ -1,6 +1,7 @@
 package com.luizabau.gestordeestoque.repository;
 
 import com.luizabau.gestordeestoque.domain.Fornecedor;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,6 @@ import java.util.Optional;
 @Repository
 public interface FornecedorRepository extends JpaRepository<Fornecedor, Integer> {
 
-    Optional<Fornecedor> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByCnpj(String cnpj);
 
@@ -23,4 +23,6 @@ public interface FornecedorRepository extends JpaRepository<Fornecedor, Integer>
 
     @Query("SELECT COUNT(p) FROM Produto p WHERE p.fornecedor.id = :fornecedorId")
     Long countProdutosByFornecedor(@Param("fornecedorId") Integer fornecedorId);
+
+
 }

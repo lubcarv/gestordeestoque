@@ -24,17 +24,18 @@ public class Produto {
 
     @NotBlank(message = "Código é obrigatório")
     @Size(max = 50, message = "Código deve ter no máximo 50 caracteres")
-    @Column(name = "codigo", unique = true, nullable = false, length = 50)
+    @Column(name = "codigo", unique = true, nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
     private String codigo;
 
     @NotBlank(message = "Nome é obrigatório")
     @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
-    @Column(name = "nome", nullable = false, length = 100)
+    @Column(name = "nome", nullable = false, length = 100, columnDefinition = "VARCHAR(100)")
     private String nome;
 
     @Size(max = 500, message = "Descrição deve ter no máximo 500 caracteres")
-    @Column(name = "descricao", length = 500)
+    @Column(name = "descricao", length = 500, columnDefinition = "VARCHAR(500)")
     private String descricao;
+
 
     @NotNull(message = "Preço é obrigatório")
     @Positive(message = "Preço deve ser positivo")
@@ -65,7 +66,7 @@ public class Produto {
     private Integer quantidadeMaxima;
 
     @Builder.Default
-    @Column(name = "ativo")
+    @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -74,7 +75,7 @@ public class Produto {
     private Categoria categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fornecedor_id")
+    @JoinColumn(name = "fornecedor_id",  nullable = false)
     @JsonIgnoreProperties({"produtos", "hibernateLazyInitializer", "handler"})
     private Fornecedor fornecedor;
 
@@ -93,37 +94,26 @@ public class Produto {
     @Column(name = "usuario_atualizacao")
     private String usuarioAtualizacao;
 
+
     @PrePersist
     protected void onCreate() {
         dataCriacao = LocalDateTime.now();
         dataAtualizacao = LocalDateTime.now();
         usuarioCriacao = "lubcarv";
-
-        if (estoque == null) {
-            this.estoque = new Estoque();
-            this.estoque.setProduto(this);
-            this.estoque.setQuantidade(0);
-            this.estoque.setQuantidadeMinima(this.quantidadeMinima);
-            this.estoque.setQuantidadeIdeal(this.quantidadeIdeal);
-            this.estoque.setQuantidadeMaxima(this.quantidadeMaxima);
-            this.estoque.atualizarSituacao();        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         dataAtualizacao = LocalDateTime.now();
         usuarioAtualizacao = "lubcarv";
-
-        if (estoque != null) {
-            estoque.setQuantidadeMinima(this.quantidadeMinima);
-            estoque.setQuantidadeIdeal(this.quantidadeIdeal);
-            estoque.setQuantidadeMaxima(this.quantidadeMaxima);
-            estoque.atualizarSituacao();
-        }
     }
 
-    public boolean isPrecisoReposicao() {
-        return estoque != null && estoque.getQuantidade() <= quantidadeMinima;
+    public void inativar() {
+        this.ativo = false;
+    }
+
+    public void ativar() {
+        this.ativo = true;
     }
 
     @Override

@@ -3,9 +3,7 @@ package com.luizabau.gestordeestoque.service;
 import com.luizabau.gestordeestoque.domain.Categoria;
 import com.luizabau.gestordeestoque.dto.CategoriaCreateDTO;
 import com.luizabau.gestordeestoque.dto.CategoriaResponseDTO;
-import com.luizabau.gestordeestoque.dto.CategoriaSimpleDTO;
 import com.luizabau.gestordeestoque.dto.CategoriaUpdateDTO;
-import com.luizabau.gestordeestoque.mapper.CategoriaMapper;
 import com.luizabau.gestordeestoque.repository.CategoriaRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,28 +19,23 @@ import java.util.stream.Collectors;
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
-    private final CategoriaMapper categoriaMapper;
+
 
     @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> listarTodas() {
         return categoriaRepository.findAll().stream()
-                .map(categoriaMapper::toResponseDTO)
+                .map(CategoriaResponseDTO::from)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<CategoriaSimpleDTO> listarAtivas() {
-        return categoriaRepository.findByAtivaTrue().stream()
-                .map(categoriaMapper::toSimpleDTO)
-                .collect(Collectors.toList());
-    }
 
     @Transactional(readOnly = true)
     public CategoriaResponseDTO buscarPorId(Integer id) throws Exception {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Categoria não encontrada"));
-        return categoriaMapper.toResponseDTO(categoria);
+        return CategoriaResponseDTO.from(categoria);
     }
+
 
     @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> buscarPorDescricao(String descricao) throws Exception {
@@ -51,9 +44,10 @@ public class CategoriaService {
             throw new Exception("Nenhuma categoria encontrada com a descrição: " + descricao);
         }
         return categorias.stream()
-                .map(categoriaMapper::toResponseDTO)
+                .map(CategoriaResponseDTO::from)
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public CategoriaResponseDTO criar(CategoriaCreateDTO createDTO) throws Exception {
@@ -61,18 +55,23 @@ public class CategoriaService {
             throw new Exception("Já existe uma categoria com este nome");
         }
 
-        Categoria categoria = categoriaMapper.toEntity(createDTO);
+        Categoria categoria = Categoria.builder()
+                .nome(createDTO.getNome())
+                .descricao(createDTO.getDescricao())
+                .ativa(createDTO.getAtiva() != null ? createDTO.getAtiva() : true)
+                .build();
+
         categoria = categoriaRepository.save(categoria);
         log.info("Categoria criada: ID={}, Nome={}", categoria.getId(), categoria.getNome());
 
-        return categoriaMapper.toResponseDTO(categoria);
+        return CategoriaResponseDTO.from(categoria);
     }
+
 
     @Transactional
     public CategoriaResponseDTO atualizar(Integer id, CategoriaUpdateDTO updateDTO) throws Exception {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Categoria não encontrada"));
-
 
         if (updateDTO.getNome() != null &&
                 !categoria.getNome().equalsIgnoreCase(updateDTO.getNome()) &&
@@ -87,8 +86,9 @@ public class CategoriaService {
         categoria = categoriaRepository.save(categoria);
         log.info("Categoria atualizada: ID={}", categoria.getId());
 
-        return categoriaMapper.toResponseDTO(categoria);
+        return CategoriaResponseDTO.from(categoria);
     }
+
 
     @Transactional
     public void excluir(Integer id) throws Exception {

@@ -19,15 +19,10 @@ public class FornecedorController {
 
     private final FornecedorService fornecedorService;
 
+
     @GetMapping
     public ResponseEntity<List<FornecedorResponseDTO>> listar() {
         List<FornecedorResponseDTO> fornecedores = fornecedorService.listarTodos();
-        return ResponseEntity.ok(fornecedores);
-    }
-
-    @GetMapping("/ativos")
-    public ResponseEntity<List<FornecedorSimpleDTO>> listarAtivos() {
-        List<FornecedorSimpleDTO> fornecedores = fornecedorService.listarAtivos();
         return ResponseEntity.ok(fornecedores);
     }
 
@@ -41,6 +36,7 @@ public class FornecedorController {
         }
     }
 
+
     @GetMapping("/nome/{nome}")
     public ResponseEntity<List<FornecedorResponseDTO>> buscarPorNome(@PathVariable String nome) {
         try {
@@ -50,6 +46,7 @@ public class FornecedorController {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @PostMapping
     public ResponseEntity<FornecedorResponseDTO> criar(@Valid @RequestBody FornecedorCreateDTO createDTO) {
@@ -62,6 +59,7 @@ public class FornecedorController {
                     .build();
         }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<FornecedorResponseDTO> atualizar(
