@@ -1,11 +1,14 @@
 package com.luizabau.gestordeestoque.repository;
 
 import com.luizabau.gestordeestoque.domain.Produto;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,19 +17,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Integer> {
 
     boolean existsByCodigo(String codigo);
 
-    @Query("SELECT p FROM Produto p " +
-            "LEFT JOIN FETCH p.categoria " +
-            "LEFT JOIN FETCH p.fornecedor " +
-            "LEFT JOIN FETCH p.estoque " +
-            "WHERE p.ativo = false")
-    List<Produto> findByAtivoFalse();
-
-    @Query("SELECT p FROM Produto p " +
-            "LEFT JOIN FETCH p.categoria " +
-            "LEFT JOIN FETCH p.fornecedor " +
-            "LEFT JOIN FETCH p.estoque " +
-            "WHERE p.ativo = true")
-    List<Produto> findByAtivoTrue();
 
     @Query("SELECT DISTINCT p FROM Produto p " +
             "LEFT JOIN FETCH p.categoria " +

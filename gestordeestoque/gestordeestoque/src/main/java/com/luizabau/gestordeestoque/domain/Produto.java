@@ -36,7 +36,6 @@ public class Produto {
     @Column(name = "descricao", length = 500, columnDefinition = "VARCHAR(500)")
     private String descricao;
 
-
     @NotNull(message = "Preço é obrigatório")
     @Positive(message = "Preço deve ser positivo")
     @Column(name = "preco", precision = 10, scale = 2)
