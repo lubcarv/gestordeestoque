@@ -1,9 +1,10 @@
 package com.luizabau.gestordeestoque.config;
 
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 import java.net.URI;
@@ -13,8 +14,11 @@ import java.net.URISyntaxException;
 public class DatabaseConfig {
 
     @Bean
+    @Primary
     public DataSource dataSource() {
         String databaseUrl = System.getenv("DATABASE_URL");
+
+        System.out.println("DATABASE_URL detectada: " + databaseUrl); // Log para debug
 
         if (databaseUrl != null && databaseUrl.startsWith("postgres://")) {
             try {
@@ -22,6 +26,8 @@ public class DatabaseConfig {
                 String username = dbUri.getUserInfo().split(":")[0];
                 String password = dbUri.getUserInfo().split(":")[1];
                 String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+
+                System.out.println("URL convertida para: " + jdbcUrl); // Log para debug
 
                 return DataSourceBuilder
                         .create()
@@ -35,12 +41,12 @@ public class DatabaseConfig {
             }
         }
 
-        // Fallback para configuração local do application.properties
+        System.out.println("Usando configuração local"); // Log para debug
         return DataSourceBuilder
                 .create()
-                .url(System.getenv().getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/db_gestordeestoque"))
-                .username(System.getenv().getOrDefault("DB_USERNAME", "root"))
-                .password(System.getenv().getOrDefault("DB_PASSWORD", "admin"))
+                .url("jdbc:postgresql://localhost:5432/db_gestordeestoque")
+                .username("root")
+                .password("admin")
                 .driverClassName("org.postgresql.Driver")
                 .build();
     }
