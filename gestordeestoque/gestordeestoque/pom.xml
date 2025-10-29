@@ -11,6 +11,7 @@
 	<groupId>com.luizabau</groupId>
 	<artifactId>gestordeestoque</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<name>gestordeestoque</name>
 	<description>Projeto voltado para o controle e gestão de entrada e saída de produtos</description>
 
