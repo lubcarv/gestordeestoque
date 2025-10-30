@@ -36,11 +36,11 @@ public class SwaggerConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:" + serverPort)
-                                .description("Servidor de Desenvolvimento"),
+                                .url("https://gestordeestoque.onrender.com")
+                                .description("Servidor Render (produção)"),
                         new Server()
-                                .url("https://gestordeestoque.herokuapp.com")
-                                .description("Servidor de Produção")
+                                .url("http://localhost:" + serverPort)
+                                .description("Servidor de Desenvolvimento")
                 ));
     }
 }
