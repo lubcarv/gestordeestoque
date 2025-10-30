@@ -18,6 +18,7 @@ public class SwaggerAutoOpener implements ApplicationRunner {
         this.environment = environment;
     }
 
+
     @Override
     public void run(ApplicationArguments args) {
         String[] activeProfiles = environment.getActiveProfiles();
@@ -25,8 +26,12 @@ public class SwaggerAutoOpener implements ApplicationRunner {
                 java.util.Arrays.asList(activeProfiles).contains("dev");
 
         if (!isDevelopment) {
-            System.out.println("🚀 Swagger UI disponível em: http://localhost:" + serverPort + "/swagger-ui/index.html");
-            return;
+            String baseUrl = System.getenv("RENDER_EXTERNAL_URL");
+            if (baseUrl == null || baseUrl.isBlank()) {
+                baseUrl = "http://localhost:" + serverPort;
+            }
+            System.out.println("🚀 Swagger UI disponível em: " + baseUrl + "/swagger-ui/index.html");
+
         }
 
         try {
