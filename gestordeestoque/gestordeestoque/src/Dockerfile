@@ -9,7 +9,7 @@ COPY . .
 
 RUN mvn clean install -DskipTests
 
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-slim
 
 EXPOSE 8080
 
