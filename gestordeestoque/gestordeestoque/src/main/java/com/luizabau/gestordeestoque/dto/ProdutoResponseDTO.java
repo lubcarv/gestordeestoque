@@ -23,8 +23,13 @@ public class ProdutoResponseDTO {
     private Integer quantidadeIdeal;
     private Integer quantidadeMaxima;
     private Boolean ativo;
+
+    private Integer categoriaId;
     private String categoriaNome;
+
+    private Integer fornecedorId;
     private String fornecedorNome;
+
     private SituacaoEstoque situacaoEstoque;
 
 
@@ -43,8 +48,13 @@ public class ProdutoResponseDTO {
         dto.quantidadeIdeal = produto.getQuantidadeIdeal();
         dto.quantidadeMaxima = produto.getQuantidadeMaxima();
         dto.ativo = produto.getAtivo();
+
+        dto.categoriaId = produto.getCategoria() != null ? produto.getCategoria().getId() : null;
         dto.categoriaNome = produto.getCategoria() != null ? produto.getCategoria().getNome() : null;
+
+        dto.fornecedorId = produto.getFornecedor() != null ? produto.getFornecedor().getId() : null;
         dto.fornecedorNome = produto.getFornecedor() != null ? produto.getFornecedor().getNome() : null;
+
         dto.situacaoEstoque = produto.getEstoque() != null
                 ? produto.getEstoque().getSituacao()
                 : SituacaoEstoque.SEM_ESTOQUE;
