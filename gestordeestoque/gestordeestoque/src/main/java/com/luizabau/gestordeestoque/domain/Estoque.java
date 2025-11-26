@@ -42,7 +42,7 @@ public class Estoque {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(name = "situacao", nullable = false)
-    private SituacaoEstoque situacao = SituacaoEstoque.SEM_ESTOQUE;
+    private SituacaoEstoque situacao = SituacaoEstoque. SEM_ESTOQUE;
 
     @Column(name = "data_ultima_movimentacao")
     private LocalDateTime dataUltimaMovimentacao;
@@ -57,7 +57,7 @@ public class Estoque {
         atualizarSituacao();
     }
 
-    public MovimentacaoEstoque entrar(int quantidade, String usuario, String motivo) throws Exception {
+    public MovimentacaoEstoque entrar(int quantidade, String usuario, String observacao) throws Exception {
         if (quantidade <= 0) {
             throw new Exception("Quantidade deve ser positiva");
         }
@@ -68,33 +68,39 @@ public class Estoque {
 
         return MovimentacaoEstoque.builder()
                 .produto(this.produto)
-                .tipo("ENTRADA")
+                .tipo(TipoMovimentacao.ENTRADA)
                 .quantidade(quantidade)
+                .dataMovimentacao(LocalDateTime.now())
+                .usuario(usuario)
+                .observacao(observacao)
                 .build();
     }
 
-    public MovimentacaoEstoque sair(int quantidade, String usuario, String motivo) throws Exception {
+    public MovimentacaoEstoque sair(int quantidade, String usuario, String observacao) throws Exception {
         if (quantidade <= 0) {
             throw new Exception("Quantidade deve ser positiva");
         }
         if (this.quantidade < quantidade) {
-            throw new Exception("Estoque insuficiente. Disponível: " + this.quantidade);
+            throw new Exception("Estoque insuficiente.  Disponível: " + this.quantidade);
         }
-        this.quantidade -= quantidade;
-        this.dataUltimaMovimentacao = LocalDateTime.now();
+        this. quantidade -= quantidade;
+        this. dataUltimaMovimentacao = LocalDateTime.now();
         this.usuarioUltimaMovimentacao = usuario;
         atualizarSituacao();
 
         return MovimentacaoEstoque.builder()
                 .produto(this.produto)
-                .tipo("SAIDA")
+                . tipo(TipoMovimentacao.SAIDA)
                 .quantidade(quantidade)
+                .dataMovimentacao(LocalDateTime.now())
+                .usuario(usuario)
+                .observacao(observacao)
                 .build();
     }
 
     public void atualizarSituacao() {
         if (quantidade == 0) {
-            situacao = SituacaoEstoque.SEM_ESTOQUE;
+            situacao = SituacaoEstoque. SEM_ESTOQUE;
         } else if (quantidade <= quantidadeMinima) {
             situacao = SituacaoEstoque.BAIXO;
         } else if (quantidadeMaxima != null && quantidade >= quantidadeMaxima) {

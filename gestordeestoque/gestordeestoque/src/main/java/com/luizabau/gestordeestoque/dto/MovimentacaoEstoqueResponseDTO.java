@@ -1,6 +1,7 @@
 package com.luizabau.gestordeestoque.dto;
 
 import com.luizabau.gestordeestoque.domain.MovimentacaoEstoque;
+import com.luizabau.gestordeestoque.domain.TipoMovimentacao;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public class MovimentacaoEstoqueResponseDTO {
     private Integer produtoId;
     private String produtoCodigo;
     private String produtoNome;
-    private String tipo;
+    private TipoMovimentacao tipo;
     private Integer quantidade;
     private LocalDateTime dataMovimentacao;
 
