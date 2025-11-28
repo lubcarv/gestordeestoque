@@ -1,18 +1,37 @@
-FROM ubuntu:latest AS build
+# ===================================
+# Stage 1: Build com Maven
+# ===================================
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 
-RUN apt-get update && \
-    apt-get install -y openjdk-21-jdk maven && \
-    apt-get clean
+WORKDIR /build
+
+# Copiar pom.xml primeiro (para cache de dependências)
+COPY gestordeestoque/gestordeestoque/pom. xml.
+
+# Baixar dependências (cache)
+RUN mvn dependency:go-offline -B
+
+# Copiar código fonte
+COPY gestordeestoque/gestordeestoque/src ./src
+
+# Build da aplicação
+RUN mvn clean package -DskipTests -B
+
+# ===================================
+# Stage 2: Runtime
+# ===================================
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
-COPY . .
 
-RUN mvn clean install -DskipTests
+# Copiar o JAR compilado
+COPY --from=build /build/target/gestordeestoque-0.0.1-SNAPSHOT.jar app.jar
 
-FROM eclipse-temurin:21-jre
-
+# Expor porta
 EXPOSE 8080
 
-COPY --from=build /app/target/gestordeestoque-0.0.1-SNAPSHOT.jar app.jar
+# Configurações de JVM para produção
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Comando de execução
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
