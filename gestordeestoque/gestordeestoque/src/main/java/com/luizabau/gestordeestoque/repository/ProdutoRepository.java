@@ -17,7 +17,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Integer> {
 
     boolean existsByCodigo(String codigo);
 
-
     @Query("SELECT DISTINCT p FROM Produto p " +
             "LEFT JOIN FETCH p.categoria " +
             "LEFT JOIN FETCH p.fornecedor " +

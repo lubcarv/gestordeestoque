@@ -1,24 +1,25 @@
 package com.luizabau.gestordeestoque.service;
 
-import com.luizabau.gestordeestoque.domain.Estoque;
-import com.luizabau.gestordeestoque.domain.MovimentacaoEstoque;
-import com.luizabau.gestordeestoque.domain.Produto;
-import com.luizabau.gestordeestoque.dto.CategoriaResponseDTO;
+import com.luizabau. gestordeestoque.domain. Estoque;
+import com. luizabau.gestordeestoque.domain.MovimentacaoEstoque;
+import com. luizabau.gestordeestoque.domain.Produto;
 import com.luizabau.gestordeestoque.dto.MovimentacaoEstoqueResponseDTO;
-import com.luizabau.gestordeestoque.dto.ProdutoResponseDTO;
+import com.luizabau.gestordeestoque. dto.ProdutoResponseDTO;
 import com.luizabau.gestordeestoque.repository.EstoqueRepository;
 import com.luizabau.gestordeestoque.repository.MovimentacaoEstoqueRepository;
 import com.luizabau.gestordeestoque.repository.ProdutoRepository;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j. Slf4j;
+import org. springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import java. util.List;
+import java. util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class MovimentacaoDeEstoqueService {
     private final ProdutoRepository produtoRepository;
     private final EstoqueRepository estoqueRepository;
@@ -31,6 +32,8 @@ public class MovimentacaoDeEstoqueService {
 
     @Transactional
     public ProdutoResponseDTO reporEstoque(Integer produtoId, int quantidade, String usuario) throws Exception {
+        log.info("Reposição de estoque: Produto={}, Qtd={}, Usuario={}", produtoId, quantidade, usuario);
+
         Produto produto = buscarProdutoPorId(produtoId);
 
         if (produto.getEstoque() == null) {
@@ -45,7 +48,7 @@ public class MovimentacaoDeEstoqueService {
             estoque = estoqueRepository.save(estoque);
             produto.setEstoque(estoque);
 
-            System.out.println(" [" + LocalDateTime.now() + "] Estoque criado para produto ID: " + produtoId + " por " + usuario);
+            log.info("Estoque criado para produto ID: {}", produtoId);
         }
 
         MovimentacaoEstoque movimentacao = produto.getEstoque().entrar(quantidade, usuario, "Reposição de estoque");
@@ -53,16 +56,19 @@ public class MovimentacaoDeEstoqueService {
         produto = produtoRepository.save(produto);
         movimentacaoEstoqueRepository.save(movimentacao);
 
-        System.out.println(" [" + LocalDateTime.now() + "] Reposição: Produto=" + produtoId + ", Qtd=" + quantidade + ", Total=" + produto.getEstoque().getQuantidade() + " por " + usuario);
+        log.info("Reposição concluída: Produto={}, Qtd={}, Total={}",
+                produtoId, quantidade, produto.getEstoque().getQuantidade());
 
         return ProdutoResponseDTO.from(produto);
     }
 
     @Transactional
     public ProdutoResponseDTO sairEstoque(Integer produtoId, int quantidade, String usuario) throws Exception {
+        log. info("Saída de estoque: Produto={}, Qtd={}, Usuario={}", produtoId, quantidade, usuario);
+
         Produto produto = buscarProdutoPorId(produtoId);
 
-        if (produto.getEstoque() == null) {
+        if (produto. getEstoque() == null) {
             throw new Exception("Não há estoque cadastrado para este produto. Realize uma reposição primeiro.");
         }
 
@@ -72,13 +78,13 @@ public class MovimentacaoDeEstoqueService {
 
         MovimentacaoEstoque movimentacao = produto.getEstoque().sair(quantidade, usuario, "Saída de estoque");
         produto = produtoRepository.save(produto);
-        movimentacaoEstoqueRepository.save(movimentacao);
+        movimentacaoEstoqueRepository. save(movimentacao);
 
-        System.out.println(" [" + LocalDateTime.now() + "] Saída: Produto=" + produtoId + ", Qtd=" + quantidade + ", Restante=" + produto.getEstoque().getQuantidade() + " por " + usuario);
+        log.info("Saída concluída: Produto={}, Qtd={}, Restante={}",
+                produtoId, quantidade, produto.getEstoque(). getQuantidade());
 
         return ProdutoResponseDTO.from(produto);
     }
-
 
     @Transactional(readOnly = true)
     public List<MovimentacaoEstoqueResponseDTO> buscarHistorico(Integer produtoId) throws Exception {
@@ -86,13 +92,12 @@ public class MovimentacaoDeEstoqueService {
         List<MovimentacaoEstoque> movimentacoes = movimentacaoEstoqueRepository.findHistoricoPorProduto(produtoId);
 
         return movimentacoes.stream()
-                .map(MovimentacaoEstoqueResponseDTO::from)
+                . map(MovimentacaoEstoqueResponseDTO::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<Produto> listarProdutosPrecisandoReposicao() {
-        return produtoRepository.findProdutosComEstoqueBaixo();
+        return produtoRepository. findProdutosComEstoqueBaixo();
     }
-
 }
