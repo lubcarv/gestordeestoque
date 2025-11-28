@@ -6,7 +6,7 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /build
 
 # Copiar pom.xml primeiro (para cache de dependências)
-COPY gestordeestoque/gestordeestoque/pom. xml.
+COPY gestordeestoque/gestordeestoque/pom.xml .
 
 # Baixar dependências (cache)
 RUN mvn dependency:go-offline -B
@@ -33,5 +33,4 @@ EXPOSE 8080
 # Configurações de JVM para produção
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Comando de execução
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
