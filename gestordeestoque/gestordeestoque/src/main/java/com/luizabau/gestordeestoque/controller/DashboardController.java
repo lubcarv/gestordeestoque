@@ -1,13 +1,13 @@
 package com.luizabau.gestordeestoque.controller;
 
-import com. luizabau.gestordeestoque.dto.*;
+import com.luizabau.gestordeestoque.dto.*;
 import com.luizabau.gestordeestoque.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org. springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
