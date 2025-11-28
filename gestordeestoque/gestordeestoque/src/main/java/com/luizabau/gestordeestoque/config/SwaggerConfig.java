@@ -17,6 +17,8 @@ public class SwaggerConfig {
     @Value("${server.port:8080}")
     private String serverPort;
 
+    String baseUrl = System.getenv("RENDER_EXTERNAL_URL");
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -36,9 +38,5 @@ public class SwaggerConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                 new Server()
-                        .url("http://localhost:" + serverPort)
-                        .description("Servidor de Desenvolvimento"),
-                new Server()
-                        .url("https://gestordeestoque.herokuapp.com")
-                        .description("Servidor de Produção")
+                        .url(baseUrl)
         ));}}
