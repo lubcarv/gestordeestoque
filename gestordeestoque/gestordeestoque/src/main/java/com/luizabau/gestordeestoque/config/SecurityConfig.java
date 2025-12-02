@@ -17,7 +17,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth. anyRequest().permitAll())
                 . formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
-                .cors(cors -> cors.disable());
         return http.build();
     }
 }
